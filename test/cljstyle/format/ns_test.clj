@@ -522,4 +522,72 @@
   (:require
     [ab.cd.x :as x]
     #_[ab.cd.y]
+    [ab.cd.z :as z]))")))
+  (testing "complex reader macros in require blocks"
+    (is (rule-reformatted?
+          ns/format-namespaces {}
+          "(ns ab.cd.example
+  (:require
+    [ab.cd.x :as x]
+    [ab.cd.z :as z]
+    #_{:my/macro [:my-keyword]}
+    [ab.cd.y :as y]))"
+          "(ns ab.cd.example
+  (:require
+    [ab.cd.x :as x]
+    #_{:my/macro [:my-keyword]}
+    [ab.cd.y :as y]
+    [ab.cd.z :as z]))")))
+  (testing "simple reader macro positioning"
+    (is (rule-reformatted?
+          ns/format-namespaces {}
+          "(ns ab.cd.example
+  (:require
+    [ab.cd.x :as x]
+    [ab.cd.z :as z]
+    #_:my-ignore
+    [ab.cd.y :as y]))"
+          "(ns ab.cd.example
+  (:require
+    [ab.cd.x :as x]
+    #_:my-ignore
+    [ab.cd.y :as y]
+    [ab.cd.z :as z]))")))
+  (testing "reader macros with regular comments"
+    (is (rule-reformatted?
+          ns/format-namespaces {}
+          "(ns ab.cd.example
+  (:require
+    [ab.cd.x :as x]
+    [ab.cd.z :as z]
+    ;; This dependency is temporarily disabled
+    #_:my/macro
+    [ab.cd.y :as y]))"
+          "(ns ab.cd.example
+  (:require
+    [ab.cd.x :as x]
+    ;; This dependency is temporarily disabled
+    #_:my/macro
+    [ab.cd.y :as y]
+    [ab.cd.z :as z]))")))
+  (testing "multiple comments and reader macros"
+    (is (rule-reformatted?
+          ns/format-namespaces {}
+          "(ns ab.cd.example
+  (:require
+    [ab.cd.x :as x]
+    [ab.cd.z :as z]
+    ;; First comment
+    ;; Second comment
+    #_{:my/macro [:my-keyword]}
+    #_:another-ignore
+    [ab.cd.y :as y]))"
+          "(ns ab.cd.example
+  (:require
+    [ab.cd.x :as x]
+    ;; First comment
+    ;; Second comment
+    #_{:my/macro [:my-keyword]}
+    #_:another-ignore
+    [ab.cd.y :as y]
     [ab.cd.z :as z]))"))))

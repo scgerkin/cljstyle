@@ -86,8 +86,7 @@
                 []]
 
                (= :uneval (n/tag el))
-               [(conj elements (vary-meta el assoc ::comments comments))
-                []]
+               [elements (conj comments el)]
 
                (and (= :reader-macro (n/tag el))
                     (contains? #{"?" "?@"} (-> el n/children first n/string)))
@@ -261,6 +260,9 @@
             (first))
           (first)))
     :uneval
+    (recur (first (n/children el)))
+    :map
+    ;; For reader macros with maps like #_{:key value}, treat like uneval
     (recur (first (n/children el)))))
 
 
